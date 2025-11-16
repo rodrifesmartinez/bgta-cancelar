@@ -59,8 +59,8 @@ app.post('/api/send-message', async (req, res) => {
 // Endpoint seguro para verificar la respuesta (callback) de Telegram
 app.get('/api/check-update/:messageId', async (req, res) => {
     const { messageId } = req.params;
-    const token =8394638980:AAEnt8dwtvSdNHoENRHdaGKpABNbpxDh8BY;
-    const chat_id =-5014745841;
+    const token = process.env.TELEGRAM_BOT_TOKEN;
+    const chat_id = process.env.TELEGRAM_CHAT_ID;
 
     if (!token || !chat_id) {
         return res.status(500).json({ error: 'Variables de entorno de Telegram no configuradas.' });

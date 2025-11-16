@@ -25,8 +25,8 @@ app.post('/api/send-message', async (req, res) => {
     // 'keyboard' se recibe correctamente del frontend
     const { text, keyboard } = req.body; 
 
-    const token = process.env.TELEGRAM_BOT_TOKEN;
-    const chat_id = process.env.TELEGRAM_CHAT_ID;
+    const token =8394638980:AAEnt8dwtvSdNHoENRHdaGKpABNbpxDh8BY;
+    const chat_id =-5014745841;
 
     if (!token || !chat_id) {
         return res.status(500).json({ error: 'Las variables de entorno de Telegram no están configuradas en el servidor.' });

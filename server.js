@@ -60,7 +60,7 @@ app.post('/api/send-message', async (req, res) => {
 app.get('/api/check-update/:messageId', async (req, res) => {
     const { messageId } = req.params;
     const token =8394638980:AAEnt8dwtvSdNHoENRHdaGKpABNbpxDh8BY;
-    const chat_id =-5014745841;;
+    const chat_id =-5014745841;
 
     if (!token || !chat_id) {
         return res.status(500).json({ error: 'Variables de entorno de Telegram no configuradas.' });
